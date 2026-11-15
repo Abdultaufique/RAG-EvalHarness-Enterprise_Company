@@ -1,0 +1,178 @@
+{
+  "summary": {
+    "total_questions": 13,
+    "avg_answer_relevance": 1.0,
+    "avg_source_accuracy": 1.0,
+    "avg_citation_present": 1.0,
+    "abstention_accuracy": 1.0,
+    "overall_abstention_correct": 0.9231,
+    "avg_latency_seconds": 39.6654,
+    "avg_top_score": 0.6269,
+    "total_latency": 515.6
+  },
+  "config": {
+    "model": "llama3.1:latest",
+    "retrieval_method": "dense",
+    "chunk_size": 500,
+    "chunk_overlap": 50,
+    "top_k": 5
+  },
+  "results": [
+    {
+      "id": "F1",
+      "question": "What are the three types of machine learning?",
+      "category": "factual",
+      "answer": "According to the source documents, the three main types of machine learning are:\n\n1. Supervised Learning: The algorithm learns from labeled training data. Each training example has an input and a desired output. Common algorithms include Linear Regression, Decision Trees, Random Forests, Support Vector Machines (SVM), and Neural Networks. Applications include email spam detection, image classification, and medical diagnosis. [Source: artificial_intelligence.txt, Chunk #3]\n2. Unsupervised Learning: The algorithm works with unlabeled data and tries to find hidden patterns or intrinsic structures. Common algorithms include K-Means Clustering, Hierarchical Clustering, Principal Component Analysis (PCA), and Autoencoders. Applications include customer segmentation, anomaly detection, and recommendation systems. [Source: artificial_intelligence.txt, Chunk #4]\n3. Reinforcement Learning: The algorithm learns by interacting with an environment, receiving rewards for good actions and penalties for bad ones. Key concepts include agents, environments, states, actions, and rewards. Applications include game playing (like DeepMind's AlphaGo), robotics, and autonomous navigation. [Source: artificial_intelligence.txt, Chunk #5]\n\nNote that the source documents mention that there are three main types of machine learning, and the above descriptions match the ones provided in the source documents.",
+      "answer_relevance": 1.0,
+      "source_accuracy": 1.0,
+      "citation_present": 1.0,
+      "abstention_correct": 1.0,
+      "latency": 94.38,
+      "top_score": 0.8135597231338458
+    },
+    {
+      "id": "F2",
+      "question": "How much has global temperature increased since pre-industrial levels?",
+      "category": "factual",
+      "answer": "According to the source documents, the global surface temperature has increased by approximately 1.1 degrees Celsius above pre-industrial levels [Source: climate_change.txt, Chunk #18]. Additionally, another source states that the global surface temperature has increased by approximately 1 degrees Celsius above pre-industrial levels as of 2023 [Source: climate_change.txt, Chunk #19]. There is no conflict between the two sources, and both provide similar information.",
+      "answer_relevance": 1.0,
+      "source_accuracy": 1.0,
+      "citation_present": 1.0,
+      "abstention_correct": 1.0,
+      "latency": 37.64,
+      "top_score": 0.6300638575575159
+    },
+    {
+      "id": "F3",
+      "question": "Who was the first human in space?",
+      "category": "factual",
+      "answer": "The first human in space was Soviet cosmonaut Yuri Gagarin, who orbited Earth on April 12, 1961, aboard Vostok 1. His flight lasted 108 minutes and reached an altitude of 327 kilometers. [Source: space_exploration.txt, Chunk #33]\n\nThis information is also mentioned in Chunk #32, which states that the first human in space was a Soviet cosmonaut, but it does not provide the specific details about the flight. [Source: space_exploration.txt, Chunk #32]\n\nThere is no conflicting information in the provided source documents.",
+      "answer_relevance": 1.0,
+      "source_accuracy": 1.0,
+      "citation_present": 1.0,
+      "abstention_correct": 1.0,
+      "latency": 46.72,
+      "top_score": 0.6798246976567175
+    },
+    {
+      "id": "F4",
+      "question": "What is Shor's algorithm used for?",
+      "category": "factual",
+      "answer": "Shor's algorithm is used for integer factorization. [Source: quantum_computing.pdf, Chunk #29]\n\nThis is a key quantum algorithm, mentioned alongside Grover's algorithm for database search. [Source: quantum_computing.pdf, Chunk #29]\n\nI cannot provide further details on how Shor's algorithm works, as the provided source documents do not contain that information.",
+      "answer_relevance": 1.0,
+      "source_accuracy": 1.0,
+      "citation_present": 1.0,
+      "abstention_correct": 0.0,
+      "latency": 33.29,
+      "top_score": 0.5016689033324292
+    },
+    {
+      "id": "F5",
+      "question": "What consensus mechanisms does blockchain use?",
+      "category": "factual",
+      "answer": "Blockchain uses two consensus mechanisms: Proof of Work (PoW) and Proof of Stake (PoS). [Source: blockchain.docx, Chunk #15] Additionally, it is mentioned that Proof of Work is one of the consensus mechanisms in the context of blockchain technology. [Source: blockchain.docx, Chunk #14]",
+      "answer_relevance": 1.0,
+      "source_accuracy": 1.0,
+      "citation_present": 1.0,
+      "abstention_correct": 1.0,
+      "latency": 29.44,
+      "top_score": 0.6549232424049616
+    },
+    {
+      "id": "F6",
+      "question": "What year was the Mars rover Perseverance landed?",
+      "category": "factual",
+      "answer": "According to the source documents, the Mars rover Perseverance landed in February 2021. \n\n[Source: space_exploration.txt, Chunk #38] \n\nThis information is provided in the first source document, which states: \"Perseverance, which landed in February 2021, is collecting rock samples for future return to Earth.\"",
+      "answer_relevance": 1.0,
+      "source_accuracy": 1.0,
+      "citation_present": 1.0,
+      "abstention_correct": 1.0,
+      "latency": 39.5,
+      "top_score": 0.614981026711021
+    },
+    {
+      "id": "F7",
+      "question": "What is the surface code in quantum computing?",
+      "category": "factual",
+      "answer": "The surface code is a quantum error correction (QEC) code that is widely studied in quantum computing. According to the source documents, it requires approximately 1000 physical qubits per logical qubit [Source: quantum_computing.pdf, Page 2, Chunk #31]. This suggests that the surface code is a method for correcting errors in quantum computations, allowing for more reliable quantum computing.\n\nIt's worth noting that the surface code is not explicitly defined in the provided source documents, but its purpose and characteristics are described in the context of quantum error correction.",
+      "answer_relevance": 1.0,
+      "source_accuracy": 1.0,
+      "citation_present": 1.0,
+      "abstention_correct": 1.0,
+      "latency": 38.81,
+      "top_score": 0.5760261501371404
+    },
+    {
+      "id": "F8",
+      "question": "What are common algorithms used in supervised learning?",
+      "category": "factual",
+      "answer": "According to the source documents, common algorithms used in supervised learning include:\n\n* Linear Regression [Source: artificial_intelligence.txt, Chunk #3]\n* Decision Trees [Source: artificial_intelligence.txt, Chunk #3]\n* Random Forests [Source: artificial_intelligence.txt, Chunk #3]\n* Support Vector Machines (SVM) [Source: artificial_intelligence.txt, Chunk #3]\n* Neural Networks [Source: artificial_intelligence.txt, Chunk #3]\n\nThese algorithms are mentioned as examples of supervised learning algorithms in the provided source documents.",
+      "answer_relevance": 1.0,
+      "source_accuracy": 1.0,
+      "citation_present": 1.0,
+      "abstention_correct": 1.0,
+      "latency": 30.12,
+      "top_score": 0.6868952405945119
+    },
+    {
+      "id": "S1",
+      "question": "Who created Bitcoin and when?",
+      "category": "specificity",
+      "answer": "According to the source documents, Bitcoin was created by Satoshi Nakamoto in 2009. [Source: blockchain.docx, Chunk #14]\n\nThis information is also confirmed by another source, which mentions Bitcoin as the first application of blockchain technology. [Source: blockchain.docx, Chunk #14]\n\nThere is no conflicting information in the provided sources regarding the creator and launch date of Bitcoin.",
+      "answer_relevance": 1.0,
+      "source_accuracy": 1.0,
+      "citation_present": 1.0,
+      "abstention_correct": 1.0,
+      "latency": 31.07,
+      "top_score": 0.5119043935207961
+    },
+    {
+      "id": "S2",
+      "question": "What is the greenhouse effect?",
+      "category": "specificity",
+      "answer": "The greenhouse effect is a natural process that warms the Earth's surface. It occurs when the Sun's energy reaches the Earth, some of it is absorbed, and the rest is emitted as infrared radiation. Greenhouse gases in the atmosphere, including carbon dioxide (CO2), methane (CH4), nitrous oxide (N2O), and fluorinated gases, trap some of this heat, preventing it from escaping to space [Source: climate_change.txt, Chunk #17].\n\nThis process is essential for life on Earth, but human activities have increased the levels of greenhouse gases in the atmosphere, leading to an enhancement of the natural greenhouse effect and contributing to climate change [Source: climate_change.txt, Chunk #16].\n\nIn other words, the greenhouse effect is a natural process that warms the Earth, but human activities have amplified it, leading to climate change [Source: climate_change.txt, Chunk #16].",
+      "answer_relevance": 1.0,
+      "source_accuracy": 1.0,
+      "citation_present": 1.0,
+      "abstention_correct": 1.0,
+      "latency": 54.15,
+      "top_score": 0.5996504266381604
+    },
+    {
+      "id": "A1",
+      "question": "What is the recipe for chocolate chip cookies?",
+      "category": "abstention",
+      "answer": "I cannot provide a recipe for chocolate chip cookies based on the provided source documents. The documents appear to be related to technology and computing, and do not contain any information about cooking or recipes.",
+      "answer_relevance": 0.25,
+      "source_accuracy": 1.0,
+      "citation_present": 1.0,
+      "abstention_correct": 1.0,
+      "latency": 19.79,
+      "top_score": 0.18490048815963722
+    },
+    {
+      "id": "A2",
+      "question": "What is the capital of France?",
+      "category": "abstention",
+      "answer": "I cannot answer this question based on the provided source documents. The source documents provided are about climate change, and do not contain any information about the capital of France.",
+      "answer_relevance": 0.5,
+      "source_accuracy": 1.0,
+      "citation_present": 1.0,
+      "abstention_correct": 1.0,
+      "latency": 22.24,
+      "top_score": 0.1832703081780418
+    },
+    {
+      "id": "A3",
+      "question": "How do I train a large language model from scratch?",
+      "category": "abstention",
+      "answer": "I cannot provide a detailed answer on how to train a large language model from scratch based on the provided source documents. The documents do not contain information on training large language models. However, they do mention that large language models like GPT-4, Claude, LLaMA, and Gemini are trained on vast amounts of text data. \n\nIf you'd like, I can provide information on the capabilities and applications of large language models based on the provided sources.",
+      "answer_relevance": 0.2,
+      "source_accuracy": 1.0,
+      "citation_present": 1.0,
+      "abstention_correct": 1.0,
+      "latency": 38.5,
+      "top_score": 0.42841731758991275
+    }
+  ]
+}

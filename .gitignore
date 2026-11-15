@@ -1,0 +1,31 @@
+# Byte-compiled / optimized
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Virtual environments
+.venv/
+venv/
+env/
+
+# Data (generated at runtime)
+data/qdrant_store/
+data/rag_enterprise.db
+data/uploads/
+
+# Frontend
+frontend/node_modules/
+frontend/.next/
+
+# IDE
+.vscode/
+.idea/
+
+# OS
+Thumbs.db
+.DS_Store
+
+# Distribution
+*.egg-info/
+dist/
+build/

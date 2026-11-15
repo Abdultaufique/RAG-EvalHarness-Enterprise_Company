@@ -1,0 +1,280 @@
+{
+  "experiment_a_retrieval_methods": {
+    "dense": {
+      "avg_source_accuracy": 1.0,
+      "avg_top_score": 0.627,
+      "details": [
+        {
+          "id": "F1",
+          "method": "dense",
+          "source_accuracy": 1.0,
+          "top_score": 0.8136,
+          "top_source": "artificial_intelligence.txt"
+        },
+        {
+          "id": "F2",
+          "method": "dense",
+          "source_accuracy": 1.0,
+          "top_score": 0.6301,
+          "top_source": "climate_change.txt"
+        },
+        {
+          "id": "F3",
+          "method": "dense",
+          "source_accuracy": 1.0,
+          "top_score": 0.6798,
+          "top_source": "space_exploration.txt"
+        },
+        {
+          "id": "F4",
+          "method": "dense",
+          "source_accuracy": 1.0,
+          "top_score": 0.5017,
+          "top_source": "quantum_computing.pdf"
+        },
+        {
+          "id": "F5",
+          "method": "dense",
+          "source_accuracy": 1.0,
+          "top_score": 0.6549,
+          "top_source": "blockchain.docx"
+        },
+        {
+          "id": "F6",
+          "method": "dense",
+          "source_accuracy": 1.0,
+          "top_score": 0.615,
+          "top_source": "space_exploration.txt"
+        },
+        {
+          "id": "F7",
+          "method": "dense",
+          "source_accuracy": 1.0,
+          "top_score": 0.576,
+          "top_source": "quantum_computing.pdf"
+        },
+        {
+          "id": "F8",
+          "method": "dense",
+          "source_accuracy": 1.0,
+          "top_score": 0.6869,
+          "top_source": "artificial_intelligence.txt"
+        },
+        {
+          "id": "S1",
+          "method": "dense",
+          "source_accuracy": 1.0,
+          "top_score": 0.5119,
+          "top_source": "blockchain.docx"
+        },
+        {
+          "id": "S2",
+          "method": "dense",
+          "source_accuracy": 1.0,
+          "top_score": 0.5997,
+          "top_source": "climate_change.txt"
+        }
+      ]
+    },
+    "bm25": {
+      "avg_source_accuracy": 0.9,
+      "avg_top_score": 8.8356,
+      "details": [
+        {
+          "id": "F1",
+          "method": "bm25",
+          "source_accuracy": 1.0,
+          "top_score": 10.2448,
+          "top_source": "artificial_intelligence.txt"
+        },
+        {
+          "id": "F2",
+          "method": "bm25",
+          "source_accuracy": 1.0,
+          "top_score": 11.6086,
+          "top_source": "climate_change.txt"
+        },
+        {
+          "id": "F3",
+          "method": "bm25",
+          "source_accuracy": 1.0,
+          "top_score": 10.1169,
+          "top_source": "space_exploration.txt"
+        },
+        {
+          "id": "F4",
+          "method": "bm25",
+          "source_accuracy": 1.0,
+          "top_score": 6.5618,
+          "top_source": "quantum_computing.pdf"
+        },
+        {
+          "id": "F5",
+          "method": "bm25",
+          "source_accuracy": 1.0,
+          "top_score": 11.6838,
+          "top_source": "blockchain.docx"
+        },
+        {
+          "id": "F6",
+          "method": "bm25",
+          "source_accuracy": 0.5,
+          "top_score": 6.4878,
+          "top_source": "artificial_intelligence.txt"
+        },
+        {
+          "id": "F7",
+          "method": "bm25",
+          "source_accuracy": 1.0,
+          "top_score": 12.5771,
+          "top_source": "quantum_computing.pdf"
+        },
+        {
+          "id": "F8",
+          "method": "bm25",
+          "source_accuracy": 1.0,
+          "top_score": 8.6872,
+          "top_source": "artificial_intelligence.txt"
+        },
+        {
+          "id": "S1",
+          "method": "bm25",
+          "source_accuracy": 1.0,
+          "top_score": 4.2427,
+          "top_source": "blockchain.docx"
+        },
+        {
+          "id": "S2",
+          "method": "bm25",
+          "source_accuracy": 0.5,
+          "top_score": 6.1451,
+          "top_source": "artificial_intelligence.txt"
+        }
+      ]
+    },
+    "hybrid": {
+      "avg_source_accuracy": 1.0,
+      "avg_top_score": 0.699,
+      "details": [
+        {
+          "id": "F1",
+          "method": "hybrid",
+          "source_accuracy": 1.0,
+          "top_score": 0.8459,
+          "top_source": "artificial_intelligence.txt"
+        },
+        {
+          "id": "F2",
+          "method": "hybrid",
+          "source_accuracy": 1.0,
+          "top_score": 0.7074,
+          "top_source": "climate_change.txt"
+        },
+        {
+          "id": "F3",
+          "method": "hybrid",
+          "source_accuracy": 1.0,
+          "top_score": 0.7759,
+          "top_source": "space_exploration.txt"
+        },
+        {
+          "id": "F4",
+          "method": "hybrid",
+          "source_accuracy": 1.0,
+          "top_score": 0.6512,
+          "top_source": "quantum_computing.pdf"
+        },
+        {
+          "id": "F5",
+          "method": "hybrid",
+          "source_accuracy": 1.0,
+          "top_score": 0.7048,
+          "top_source": "blockchain.docx"
+        },
+        {
+          "id": "F6",
+          "method": "hybrid",
+          "source_accuracy": 1.0,
+          "top_score": 0.4937,
+          "top_source": "space_exploration.txt"
+        },
+        {
+          "id": "F7",
+          "method": "hybrid",
+          "source_accuracy": 1.0,
+          "top_score": 0.7032,
+          "top_source": "quantum_computing.pdf"
+        },
+        {
+          "id": "F8",
+          "method": "hybrid",
+          "source_accuracy": 1.0,
+          "top_score": 0.7808,
+          "top_source": "artificial_intelligence.txt"
+        },
+        {
+          "id": "S1",
+          "method": "hybrid",
+          "source_accuracy": 1.0,
+          "top_score": 0.6583,
+          "top_source": "blockchain.docx"
+        },
+        {
+          "id": "S2",
+          "method": "hybrid",
+          "source_accuracy": 1.0,
+          "top_score": 0.6689,
+          "top_source": "climate_change.txt"
+        }
+      ]
+    }
+  },
+  "experiment_b_chunk_sizes": {
+    "500": {
+      "num_chunks": 46,
+      "avg_source_accuracy": 1.0,
+      "avg_top_score": 0.627
+    },
+    "250": {
+      "num_chunks": 133,
+      "avg_source_accuracy": 1.0,
+      "avg_top_score": 0.6956
+    },
+    "1000": {
+      "num_chunks": 157,
+      "avg_source_accuracy": 1.0,
+      "avg_top_score": 0.6956
+    }
+  },
+  "experiment_c_reranking": {
+    "without_reranking": 1.0,
+    "with_reranking": 1.0
+  },
+  "experiment_d_full_rag": {
+    "dense": {
+      "avg_relevance": 1.0,
+      "avg_latency": 45.0,
+      "total_latency": 225.0
+    },
+    "bm25": {
+      "avg_relevance": 0.8333,
+      "avg_latency": 41.6,
+      "total_latency": 208.1
+    },
+    "hybrid": {
+      "avg_relevance": 0.9167,
+      "avg_latency": 57.1,
+      "total_latency": 285.3
+    }
+  },
+  "config": {
+    "model": "llama3.1:latest",
+    "documents": [
+      "artificial_intelligence.txt",
+      "blockchain.docx",
+      "climate_change.txt",
+      "quantum_computing.pdf",
+      "space_exploration.txt"
+    ]
+  }
+}

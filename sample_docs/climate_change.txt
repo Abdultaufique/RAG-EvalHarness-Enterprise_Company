@@ -1,0 +1,49 @@
+CLIMATE CHANGE: SCIENCE, IMPACTS, AND SOLUTIONS
+
+Chapter 1: The Science of Climate Change
+
+Climate change refers to long-term shifts in global or regional climate patterns. Since the mid-20th century, the term has been used primarily to describe changes caused by human activities, particularly the burning of fossil fuels which increases heat-trapping greenhouse gas levels in Earth's atmosphere.
+
+The greenhouse effect is a natural process that warms the Earth's surface. When the Sun's energy reaches the Earth, some of it is reflected back to space and the rest is absorbed. The absorbed energy warms the Earth's surface, which then emits heat as infrared radiation. Greenhouse gases in the atmosphere, including carbon dioxide (CO2), methane (CH4), nitrous oxide (N2O), and fluorinated gases, trap some of this heat, preventing it from escaping to space.
+
+Since the Industrial Revolution, human activities have increased atmospheric CO2 concentrations from approximately 280 parts per million (ppm) to over 420 ppm in 2024. This represents a 50% increase in CO2 levels. The primary sources of greenhouse gas emissions include electricity and heat production (25%), agriculture and forestry (24%), industry (21%), transportation (14%), and buildings (6%).
+
+Chapter 2: Observed Changes
+
+Global surface temperature has increased by approximately 1.1 degrees Celsius above pre-industrial levels as of 2023. The last decade (2014-2023) was the warmest on record. Arctic sea ice has decreased by approximately 13% per decade since satellite records began in 1979.
+
+Sea levels have risen by approximately 20 centimeters since 1900, with the rate of rise accelerating in recent decades. Currently, sea levels are rising at about 3.6 millimeters per year. This rise is caused by thermal expansion of water and the melting of glaciers and ice sheets.
+
+Extreme weather events have become more frequent and intense. Heat waves, droughts, heavy rainfall events, and tropical cyclones have all shown increasing trends linked to climate change. The 2023 global temperature anomaly was the highest ever recorded, largely driven by a combination of climate change and El Nino conditions.
+
+Chapter 3: Impacts on Ecosystems and Society
+
+Climate change affects virtually every aspect of the natural world and human society:
+
+- Biodiversity: Rising temperatures are causing shifts in species distributions, with many species moving toward the poles or to higher elevations. Coral reefs are experiencing mass bleaching events due to ocean warming, with the Great Barrier Reef suffering its worst bleaching in 2024. An estimated 1 million species are at risk of extinction due to climate change and other human activities.
+
+- Agriculture: Changes in temperature and precipitation patterns affect crop yields. While some regions may benefit from longer growing seasons, many tropical and subtropical regions are expected to see decreased agricultural productivity. Water scarcity is projected to affect 40% of the global population by 2050.
+
+- Human Health: Climate change increases the risk of heat-related illnesses, respiratory diseases from poor air quality, and the spread of vector-borne diseases like malaria and dengue fever to new regions. Mental health impacts, including anxiety and depression related to climate change, are also increasingly recognized.
+
+- Infrastructure: Rising sea levels and extreme weather events threaten coastal infrastructure, including cities, ports, and transportation networks. An estimated $1 trillion in coastal assets could be at risk by 2050.
+
+Chapter 4: Mitigation Strategies
+
+Mitigation refers to efforts to reduce or prevent greenhouse gas emissions:
+
+- Renewable Energy: Solar and wind power have become the cheapest sources of new electricity generation in most countries. Global renewable energy capacity reached 3,870 GW in 2023. Battery storage technology is advancing rapidly, addressing the intermittency challenge.
+
+- Energy Efficiency: Improving energy efficiency in buildings, transportation, and industry can significantly reduce emissions. Smart grid technologies, LED lighting, and improved insulation are key measures.
+
+- Carbon Capture and Storage (CCS): Technologies that capture CO2 from industrial processes or directly from the atmosphere and store it underground. While promising, CCS is currently expensive and not yet deployed at the scale needed.
+
+- Nature-Based Solutions: Protecting and restoring forests, wetlands, and other ecosystems that absorb CO2. Reforestation and afforestation programs can sequester significant amounts of carbon while providing co-benefits for biodiversity and local communities.
+
+Chapter 5: International Climate Action
+
+The Paris Agreement, adopted in 2015 by 196 parties at COP21, is the landmark international treaty on climate change. Its central aim is to limit global warming to well below 2 degrees Celsius above pre-industrial levels, with efforts to limit warming to 1.5 degrees.
+
+Countries submit Nationally Determined Contributions (NDCs) outlining their climate action plans. However, current NDCs are insufficient to meet the Paris Agreement goals. The 2023 Global Stocktake concluded that the world is not on track to meet its climate targets.
+
+The transition to a low-carbon economy requires significant investment. The International Energy Agency estimates that annual clean energy investment needs to reach $4 trillion by 2030 to achieve net zero emissions by 2050. Climate finance for developing countries remains a critical issue, with developed nations pledging $100 billion per year but falling short of this target.
