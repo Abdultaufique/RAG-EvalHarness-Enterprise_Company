@@ -1,16 +1,15 @@
 """
-Streamlit Frontend — RAG-Based Enterprise Knowledge Management System
+Streamlit Frontend - RAG-Based Enterprise Knowledge Management System
 
 DUAL-MODE:
-  - Local  → FastAPI backend at localhost:8000 (full features, Ollama LLM)
-  - Cloud  → Direct pipeline in-process with Gemini 1.5 Flash (Streamlit Cloud)
+  - Local  - FastAPI backend at localhost:8000 (full features, Ollama LLM)
+  - Cloud  - Direct pipeline in-process with Gemini 1.5 Flash (Streamlit Cloud)
 
 HOW TO RUN LOCALLY:
-    cd c:\Users\abdul\OneDrive\Documents\Desktop\rag-enterprise
-    .venv\Scripts\streamlit run streamlit_app.py
+    .venv/Scripts/streamlit run streamlit_app.py
 
     FastAPI backend must also be running:
-    .venv\Scripts\uvicorn api:app --reload
+    .venv/Scripts/uvicorn api:app --reload
 """
 
 import os
