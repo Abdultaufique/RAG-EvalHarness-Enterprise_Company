@@ -614,8 +614,106 @@ with tab_docs:
         unsafe_allow_html=True,
     )
 
+    # ── CLOUD MODE: upload & ingest in-process ──────────────────
     if not st.session_state.api_ok:
-        st.warning("⚠️ Backend offline — start FastAPI first.")
+        st.markdown(
+            "<div style='background:#0d1a2a;border:1px solid #2563eb;border-radius:6px;"
+            "padding:8px 14px;font-size:12px;color:#93c5fd;margin-bottom:12px;'>"
+            "☁️ <b>Cloud Mode</b> — Documents are uploaded and embedded directly in-browser. "
+            "They stay active for this session.</div>",
+            unsafe_allow_html=True,
+        )
+
+        col_upload, col_list = st.columns([1, 1])
+
+        with col_upload:
+            st.markdown("### 📤 Upload & Ingest")
+            uploaded_files = st.file_uploader(
+                "Choose files",
+                accept_multiple_files=True,
+                type=["pdf", "docx", "txt"],
+                label_visibility="collapsed",
+                key="cloud_uploader",
+            )
+
+            if uploaded_files:
+                recreate_cloud = st.checkbox("Recreate collection (clean slate)", value=True, key="cloud_recreate")
+                if st.button("🚀 Upload & Ingest Now", use_container_width=True):
+                    import sys, tempfile
+                    project_root = Path(__file__).parent
+                    if str(project_root) not in sys.path:
+                        sys.path.insert(0, str(project_root))
+
+                    try:
+                        from config import PipelineConfig
+                        from rag_pipeline import RAGPipeline
+
+                        # Save uploaded files to a temp dir
+                        tmp_dir = Path(tempfile.mkdtemp())
+                        saved_paths = []
+                        for uf in uploaded_files:
+                            dest = tmp_dir / uf.name
+                            dest.write_bytes(uf.read())
+                            saved_paths.append(dest)
+                            st.caption(f"  Saved: {uf.name}")
+
+                        # Init or reuse pipeline
+                        with st.spinner("Loading embedding model (first time ~30s)..."):
+                            if "cloud_pipeline" not in st.session_state:
+                                cfg = PipelineConfig()
+                                st.session_state.cloud_pipeline = RAGPipeline(cfg)
+
+                        pipeline = st.session_state.cloud_pipeline
+
+                        with st.spinner(f"Ingesting {len(saved_paths)} file(s)..."):
+                            stats = pipeline.ingest(saved_paths, recreate_collection=recreate_cloud)
+
+                        # Store doc list in session
+                        if "cloud_docs" not in st.session_state:
+                            st.session_state.cloud_docs = []
+                        for uf in uploaded_files:
+                            st.session_state.cloud_docs.append({
+                                "name": uf.name,
+                                "chunks": stats.get("chunks_created", 0),
+                                "status": "processed",
+                            })
+
+                        st.success(
+                            f"Ingested {stats.get('documents_loaded')} docs → "
+                            f"{stats.get('chunks_created')} chunks → "
+                            f"{stats.get('embeddings_generated')} embeddings"
+                        )
+                        st.balloons()
+
+                    except Exception as e:
+                        st.error(f"Ingestion failed: {e}")
+
+        with col_list:
+            st.markdown("### 📋 Session Documents")
+            cloud_docs = st.session_state.get("cloud_docs", [])
+            if not cloud_docs:
+                st.markdown("""
+                <div style="text-align:center; padding:40px 0; color:#475569;">
+                    <div style="font-size:36px;">📂</div>
+                    <div style="font-size:14px; margin-top:8px;">No documents ingested yet this session</div>
+                </div>
+                """, unsafe_allow_html=True)
+            else:
+                for i, doc in enumerate(cloud_docs):
+                    with st.expander(f"📄 {doc['name']}", expanded=False):
+                        st.markdown(f"""
+                        <div style="font-size:13px; color:#94a3b8;">
+                            <b>Status:</b> <span style="color:#22c55e;">● {doc['status']}</span><br>
+                            <b>Chunks:</b> {doc['chunks']}
+                        </div>
+                        """, unsafe_allow_html=True)
+                if st.button("🗑️ Clear All (this session)", use_container_width=True):
+                    st.session_state.cloud_docs = []
+                    if "cloud_pipeline" in st.session_state:
+                        del st.session_state.cloud_pipeline
+                    st.rerun()
+
+    # ── LOCAL MODE: use FastAPI backend ─────────────────────────
     else:
         col_upload, col_list = st.columns([1, 1])
 
@@ -655,10 +753,10 @@ with tab_docs:
                 with st.spinner("Ingesting documents... this may take 30-60 seconds for large files."):
                     result = api_post("/api/documents/ingest", {"recreate_collection": recreate})
                 if "error" in result:
-                    st.error(f"❌ Ingestion failed: {result['error']}")
+                    st.error(f"Ingestion failed: {result['error']}")
                 else:
                     st.success(
-                        f"✅ Ingested {result.get('documents_loaded', '?')} documents → "
+                        f"Ingested {result.get('documents_loaded', '?')} documents → "
                         f"{result.get('chunks_created', '?')} chunks → "
                         f"{result.get('embeddings_generated', '?')} embeddings"
                     )
