@@ -1,22 +1,19 @@
 """
 Streamlit Frontend — RAG-Based Enterprise Knowledge Management System
 
-This is a full-featured Streamlit UI that connects directly to the FastAPI
-backend running at localhost:8000. It provides:
-  - Document upload and ingestion
-  - Multi-turn chat with citation display
-  - Retrieval mode toggle (Dense / BM25 / Hybrid)
-  - Conversation history sidebar
-  - System health & stats dashboard
+DUAL-MODE:
+  - Local  → FastAPI backend at localhost:8000 (full features, Ollama LLM)
+  - Cloud  → Direct pipeline in-process with Gemini 1.5 Flash (Streamlit Cloud)
 
-HOW TO RUN:
+HOW TO RUN LOCALLY:
     cd c:\Users\abdul\OneDrive\Documents\Desktop\rag-enterprise
     .venv\Scripts\streamlit run streamlit_app.py
 
-The FastAPI backend must be running first:
+    FastAPI backend must also be running:
     .venv\Scripts\uvicorn api:app --reload
 """
 
+import os
 import requests
 import streamlit as st
 from pathlib import Path
@@ -25,6 +22,21 @@ from pathlib import Path
 # Configuration
 # ─────────────────────────────────────────────────────────────────────────────
 API_BASE = "http://localhost:8000"
+
+# Detect Gemini key (env or Streamlit secrets)
+def _get_gemini_key() -> str:
+    key = os.environ.get("GEMINI_API_KEY", "").strip()
+    if key:
+        return key
+    try:
+        key = st.secrets.get("GEMINI_API_KEY", "").strip()
+        if key:
+            return key
+    except Exception:
+        pass
+    return ""
+
+GEMINI_KEY = _get_gemini_key()
 
 st.set_page_config(
     page_title="RAG Enterprise Knowledge System",
@@ -225,6 +237,50 @@ def check_api_health():
         return False, {}
 
 
+def gemini_direct_chat(question: str, retrieval_method: str, top_k: int) -> dict:
+    """
+    Cloud-mode chat: run RAG pipeline in-process with Gemini as the LLM.
+    Used when FastAPI backend is not reachable (Streamlit Cloud deployment).
+    """
+    import sys
+    import httpx
+
+    project_root = Path(__file__).parent
+    if str(project_root) not in sys.path:
+        sys.path.insert(0, str(project_root))
+
+    try:
+        from config import PipelineConfig
+        from rag_pipeline import RAGPipeline
+
+        # Cache pipeline in session state to avoid reloading on every query
+        if "cloud_pipeline" not in st.session_state:
+            with st.spinner("⚙️ Loading embedding model (first time ~30s)..."):
+                cfg = PipelineConfig()
+                st.session_state.cloud_pipeline = RAGPipeline(cfg)
+
+        pipeline = st.session_state.cloud_pipeline
+        pipeline.config.retriever.method = retrieval_method
+        pipeline.config.retriever.top_k = top_k
+        pipeline.retriever.config.method = retrieval_method
+        pipeline.retriever.config.top_k = top_k
+        pipeline.retriever._bm25_index = None
+        pipeline.retriever._bm25_chunks = None
+
+        result = pipeline.query(question)
+        result.setdefault("llm_mode", "gemini")
+        return result
+
+    except Exception as e:
+        return {
+            "answer": f"❌ Pipeline error: {e}",
+            "model": "error",
+            "citations": [],
+            "latency_seconds": 0,
+            "llm_mode": "error",
+        }
+
+
 # ─────────────────────────────────────────────────────────────────────────────
 # Session State Initialization
 # ─────────────────────────────────────────────────────────────────────────────
@@ -268,22 +324,35 @@ with st.sidebar:
         overall = health_data.get("status", "unknown")
 
         badge_cls = "badge-healthy" if overall == "healthy" else "badge-degraded"
+        llm_line = (
+            '<span style="color:#22c55e;">✓ Ollama (Local)</span>' if ollama
+            else ('<span style="color:#22c55e;">✓ Gemini Flash (Cloud)</span>' if GEMINI_KEY
+                  else '<span style="color:#ef4444;">✗ No LLM</span>')
+        )
         st.markdown(f"""
         <div style="background:#1e2130; border:1px solid #2d3148; border-radius:8px; padding:10px; font-size:13px;">
             <span class="{badge_cls}">● {overall.upper()}</span><br>
-            <span style="color:#94a3b8;">Ollama LLM:</span> {'<span style="color:#22c55e;">✓ Connected</span>' if ollama else '<span style="color:#ef4444;">✗ Offline</span>'}<br>
+            <span style="color:#94a3b8;">LLM:</span> {llm_line}<br>
             <span style="color:#94a3b8;">Vector Store:</span> {'<span style="color:#22c55e;">✓ Ready</span>' if vector else '<span style="color:#f59e0b;">○ Empty</span>'}<br>
             <span style="color:#94a3b8;">Database:</span> {'<span style="color:#22c55e;">✓ OK</span>' if db_ok else '<span style="color:#ef4444;">✗ Error</span>'}
         </div>
         """, unsafe_allow_html=True)
     else:
-        st.markdown("""
-        <div style="background:#2d1515; border:1px solid #ef4444; border-radius:8px; padding:10px; font-size:13px; color:#fca5a5;">
-            ✗ <strong>API Offline</strong><br>
-            Start backend first:<br>
-            <code style="font-size:11px;">.venv\\Scripts\\uvicorn api:app --reload</code>
+        # Cloud mode — no backend, using Gemini directly
+        llm_badge = (
+            '<span style="color:#22c55e;">✓ Gemini 1.5 Flash</span>' if GEMINI_KEY
+            else '<span style="color:#ef4444;">✗ No key set</span>'
+        )
+        st.markdown(f"""
+        <div style="background:#1a2535; border:1px solid #2563eb; border-radius:8px; padding:10px; font-size:13px; color:#93c5fd;">
+            ☁️ <strong>Cloud Mode</strong><br>
+            <span style="color:#94a3b8;">LLM:</span> {llm_badge}<br>
+            <span style="color:#94a3b8;">Mode:</span> <span style="color:#60a5fa;">In-process RAG</span><br>
+            <span style="color:#64748b; font-size:11px;">FastAPI not needed in cloud mode</span>
         </div>
         """, unsafe_allow_html=True)
+        if not GEMINI_KEY:
+            st.warning("Set GEMINI_API_KEY in Streamlit secrets to enable chat.")
 
     st.divider()
 
@@ -396,11 +465,26 @@ with tab_chat:
         unsafe_allow_html=True,
     )
 
-    if not st.session_state.api_ok:
+    # Show mode banner
+    if st.session_state.api_ok:
+        st.markdown(
+            "<div style='background:#0d2a1a;border:1px solid #22c55e;border-radius:6px;"
+            "padding:6px 12px;font-size:12px;color:#86efac;margin-bottom:8px;'>"
+            "🖥️ <b>Local Mode</b> — FastAPI backend connected</div>",
+            unsafe_allow_html=True,
+        )
+    elif GEMINI_KEY:
+        st.markdown(
+            "<div style='background:#0d1a2a;border:1px solid #2563eb;border-radius:6px;"
+            "padding:6px 12px;font-size:12px;color:#93c5fd;margin-bottom:8px;'>"
+            "☁️ <b>Cloud Mode</b> — Gemini 1.5 Flash · In-process RAG (no backend needed)</div>",
+            unsafe_allow_html=True,
+        )
+    else:
         st.warning(
-            "⚠️ **FastAPI backend is not running.**\n\n"
-            "Start it with:\n"
-            "```\n.venv\\Scripts\\uvicorn api:app --reload\n```"
+            "⚠️ **No LLM available.**\n\n"
+            "**Local**: Start FastAPI → `.venv\\Scripts\\uvicorn api:app --reload`\n\n"
+            "**Cloud**: Add `GEMINI_API_KEY` in Streamlit App → Settings → Secrets"
         )
 
     # Chat history
@@ -473,7 +557,8 @@ with tab_chat:
             key="chat_input",
         )
     with col_btn:
-        send = st.button("Send →", use_container_width=True, disabled=not st.session_state.api_ok)
+        can_send = st.session_state.api_ok or bool(GEMINI_KEY)
+        send = st.button("Send →", use_container_width=True, disabled=not can_send)
 
     if send and user_input.strip():
         # Add user message to history
@@ -483,29 +568,39 @@ with tab_chat:
             "citations": [],
         })
 
-        # Call API
-        with st.spinner("🔍 Searching documents and generating answer..."):
-            payload = {
-                "question": user_input.strip(),
-                "retrieval_method": st.session_state.retrieval_method,
-                "top_k": st.session_state.top_k,
-            }
-            if st.session_state.conversation_id:
-                payload["conversation_id"] = st.session_state.conversation_id
-
-            result = api_post("/api/chat", payload)
+        with st.spinner("🔍 Retrieving documents & generating answer..."):
+            if st.session_state.api_ok:
+                # ── Local mode: FastAPI backend ──
+                payload = {
+                    "question": user_input.strip(),
+                    "retrieval_method": st.session_state.retrieval_method,
+                    "top_k": st.session_state.top_k,
+                }
+                if st.session_state.conversation_id:
+                    payload["conversation_id"] = st.session_state.conversation_id
+                result = api_post("/api/chat", payload)
+            else:
+                # ── Cloud mode: in-process pipeline + Gemini ──
+                result = gemini_direct_chat(
+                    user_input.strip(),
+                    st.session_state.retrieval_method,
+                    st.session_state.top_k,
+                )
 
         if "error" in result:
             st.error(f"❌ {result['error']}")
-            st.session_state.messages.pop()  # Remove the user message on error
+            st.session_state.messages.pop()
         else:
-            st.session_state.conversation_id = result.get("conversation_id")
+            if st.session_state.api_ok:
+                st.session_state.conversation_id = result.get("conversation_id")
+            llm_mode = result.get("llm_mode", "")
+            mode_tag = "☁️ Gemini Flash" if "gemini" in llm_mode else "🖥️ Ollama"
             st.session_state.messages.append({
                 "role": "assistant",
                 "content": result.get("answer", "No answer returned."),
                 "citations": result.get("citations", []),
                 "latency": result.get("latency_seconds"),
-                "model": result.get("model"),
+                "model": f"{result.get('model', '')} · {mode_tag}",
             })
             st.rerun()
 

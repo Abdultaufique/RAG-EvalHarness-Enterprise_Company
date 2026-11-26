@@ -1,31 +1,29 @@
 """
-Generator — sends retrieved context + question to an LLM via Ollama.
+Generator — sends retrieved context + question to an LLM.
 
-WHY THIS MODULE EXISTS:
-This is the "G" in RAG (Retrieval-Augmented Generation). After retrieving
-relevant chunks, we need to:
+DUAL-MODE OPERATION:
+  1. LOCAL mode  → Uses Ollama (Llama 3.1 8B) at localhost:11434
+  2. CLOUD mode  → Uses Google Gemini 1.5 Flash API (free tier)
 
-1. Construct a PROMPT that includes the retrieved evidence and the question.
-2. Send it to the LLM (via Ollama's REST API).
-3. Parse the response and return the answer with citations.
+The system auto-detects which to use:
+  - If GEMINI_API_KEY is set in env/secrets → Cloud (Gemini)
+  - Otherwise → Local (Ollama)
 
-KEY DESIGN DECISIONS:
-- We use Ollama's HTTP API directly (via httpx) instead of a Python SDK
-  to minimize dependencies and keep full control over the request.
-- The prompt explicitly instructs the LLM to cite sources and abstain
-  when evidence is insufficient — this is critical for trustworthy RAG.
-- We track which source chunks were used so the UI can display citations.
+This allows the same codebase to run:
+  - Locally on your machine (Ollama, full privacy)
+  - On Streamlit Cloud (Gemini API, free tier)
 """
 
 import json
+import os
 import time
 import httpx
 
 from config import LLMConfig
 
 
-# The system prompt instructs the LLM how to behave.
-# This is separate from the user's question — it sets the "role" of the assistant.
+# ── Shared prompt templates ──────────────────────────────────────────────────
+
 SYSTEM_PROMPT = """You are a precise, evidence-based assistant. Your job is to answer questions using ONLY the provided source documents.
 
 RULES:
@@ -37,18 +35,13 @@ RULES:
 
 
 def build_context(retrieved_chunks: list[dict]) -> str:
-    """Format retrieved chunks into a context string for the LLM.
-
-    Each chunk is labeled with its source and index so the LLM can
-    reference them in citations.
-    """
+    """Format retrieved chunks into a context string for the LLM."""
     context_parts = []
     for i, chunk in enumerate(retrieved_chunks):
         source = chunk["source_file"]
         chunk_idx = chunk.get("chunk_index", i)
         page = chunk.get("page_number", -1)
         page_info = f", Page {page}" if page and page > 0 else ""
-
         context_parts.append(
             f"--- Source: {source}{page_info}, Chunk #{chunk_idx} ---\n"
             f"{chunk['text']}\n"
@@ -66,83 +59,181 @@ def build_user_prompt(question: str, context: str) -> str:
     )
 
 
+# ── Ollama backend ───────────────────────────────────────────────────────────
+
+def _generate_ollama(config: LLMConfig, user_prompt: str) -> tuple[str, str]:
+    """Call Ollama local API. Returns (answer_text, model_name)."""
+    api_url = f"{config.base_url}/api/chat"
+    payload = {
+        "model": config.model,
+        "messages": [
+            {"role": "system", "content": SYSTEM_PROMPT},
+            {"role": "user",   "content": user_prompt},
+        ],
+        "stream": False,
+        "options": {
+            "temperature": config.temperature,
+            "num_predict": config.max_tokens,
+        },
+    }
+    with httpx.Client(timeout=300.0) as client:
+        response = client.post(api_url, json=payload)
+        response.raise_for_status()
+
+    result = response.json()
+    answer = result.get("message", {}).get("content", "No response from model.")
+    return answer, config.model
+
+
+# ── Gemini backend ───────────────────────────────────────────────────────────
+
+def _generate_gemini(user_prompt: str, api_key: str) -> tuple[str, str]:
+    """Call Google Gemini 1.5 Flash API. Returns (answer_text, model_name)."""
+    model_name = "gemini-1.5-flash"
+    url = (
+        f"https://generativelanguage.googleapis.com/v1beta/models/"
+        f"{model_name}:generateContent?key={api_key}"
+    )
+    full_prompt = f"{SYSTEM_PROMPT}\n\n{user_prompt}"
+    payload = {
+        "contents": [{"parts": [{"text": full_prompt}]}],
+        "generationConfig": {
+            "temperature": 0.1,
+            "maxOutputTokens": 1024,
+        },
+    }
+    with httpx.Client(timeout=60.0) as client:
+        response = client.post(url, json=payload)
+        response.raise_for_status()
+
+    data = response.json()
+    try:
+        answer = data["candidates"][0]["content"]["parts"][0]["text"]
+    except (KeyError, IndexError):
+        answer = "No response from Gemini model."
+    return answer, f"gemini/{model_name}"
+
+
+# ── Generator class ──────────────────────────────────────────────────────────
+
 class Generator:
-    """Generates answers using an LLM via Ollama's REST API."""
+    """
+    Generates answers using an LLM — auto-selects Ollama or Gemini.
+
+    Priority:
+      1. GEMINI_API_KEY env var / Streamlit secret → use Gemini Flash
+      2. OLLAMA_BASE_URL reachable             → use Ollama (Llama 3.1)
+      3. Neither available                     → return helpful error
+    """
 
     def __init__(self, config: LLMConfig):
         self.config = config
-        self.api_url = f"{config.base_url}/api/chat"
+        self._gemini_key: str | None = self._get_gemini_key()
+        self._mode: str = "gemini" if self._gemini_key else "ollama"
 
-    def generate(
-        self,
-        question: str,
-        retrieved_chunks: list[dict],
-    ) -> dict:
-        """Generate an answer to the question using retrieved context.
+    @staticmethod
+    def _get_gemini_key() -> str | None:
+        """Check env var, then Streamlit secrets."""
+        # 1. Environment variable (works locally & on Streamlit Cloud)
+        key = os.environ.get("GEMINI_API_KEY", "").strip()
+        if key:
+            return key
 
-        Args:
-            question: The user's natural language question.
-            retrieved_chunks: List of chunk dicts from the retriever.
-
-        Returns:
-            Dict with keys:
-              - 'answer': The LLM's response text.
-              - 'model': Which model generated it.
-              - 'citations': The source chunks that were provided as context.
-              - 'latency_seconds': How long generation took.
-              - 'prompt': The full prompt sent (for debugging/evaluation).
-        """
-        context = build_context(retrieved_chunks)
-        user_prompt = build_user_prompt(question, context)
-
-        # Ollama chat API payload
-        payload = {
-            "model": self.config.model,
-            "messages": [
-                {"role": "system", "content": SYSTEM_PROMPT},
-                {"role": "user", "content": user_prompt},
-            ],
-            "stream": False,
-            "options": {
-                "temperature": self.config.temperature,
-                "num_predict": self.config.max_tokens,
-            },
-        }
-
-        start_time = time.time()
-
+        # 2. Streamlit secrets (only available inside a Streamlit app)
         try:
-            # Increased timeout for CPU inference (can be slow)
-            with httpx.Client(timeout=300.0) as client:
-                response = client.post(self.api_url, json=payload)
-                response.raise_for_status()
+            import streamlit as st
+            key = st.secrets.get("GEMINI_API_KEY", "").strip()
+            if key:
+                return key
+        except Exception:
+            pass
+
+        return None
+
+    @property
+    def mode(self) -> str:
+        """Return 'gemini' or 'ollama'."""
+        return self._mode
+
+    def generate(self, question: str, retrieved_chunks: list[dict]) -> dict:
+        """
+        Generate an answer using the best available LLM.
+
+        Returns dict with:
+          answer, model, citations, latency_seconds, prompt, llm_mode
+        """
+        context     = build_context(retrieved_chunks)
+        user_prompt = build_user_prompt(question, context)
+        start       = time.time()
+
+        # ── Try Gemini first (if key present) ──
+        if self._gemini_key:
+            try:
+                answer, model = _generate_gemini(user_prompt, self._gemini_key)
+                return {
+                    "answer":          answer,
+                    "model":           model,
+                    "citations":       retrieved_chunks,
+                    "latency_seconds": round(time.time() - start, 2),
+                    "prompt":          user_prompt,
+                    "llm_mode":        "gemini",
+                }
+            except httpx.HTTPStatusError as e:
+                if e.response.status_code == 429:
+                    answer = (
+                        "⚠️ Gemini API rate limit hit. "
+                        "Please wait a moment and try again."
+                    )
+                else:
+                    answer = f"⚠️ Gemini API error {e.response.status_code}: {e.response.text[:200]}"
+                return {
+                    "answer": answer, "model": "gemini/error",
+                    "citations": retrieved_chunks,
+                    "latency_seconds": round(time.time() - start, 2),
+                    "prompt": user_prompt, "llm_mode": "gemini_error",
+                }
+            except Exception as e:
+                answer = f"⚠️ Gemini error: {e}"
+                return {
+                    "answer": answer, "model": "gemini/error",
+                    "citations": retrieved_chunks,
+                    "latency_seconds": round(time.time() - start, 2),
+                    "prompt": user_prompt, "llm_mode": "gemini_error",
+                }
+
+        # ── Fall back to Ollama ──
+        try:
+            answer, model = _generate_ollama(self.config, user_prompt)
+            return {
+                "answer":          answer,
+                "model":           model,
+                "citations":       retrieved_chunks,
+                "latency_seconds": round(time.time() - start, 2),
+                "prompt":          user_prompt,
+                "llm_mode":        "ollama",
+            }
         except httpx.ConnectError:
             return {
-                "answer": "ERROR: Cannot connect to Ollama. "
-                          "Make sure Ollama is running (run 'ollama serve' in a terminal).",
-                "model": self.config.model,
+                "answer": (
+                    "❌ No LLM available.\n\n"
+                    "**Local mode**: Make sure Ollama is running (`ollama serve`).\n"
+                    "**Cloud mode**: Set `GEMINI_API_KEY` in Streamlit secrets."
+                ),
+                "model": "unavailable",
                 "citations": retrieved_chunks,
-                "latency_seconds": time.time() - start_time,
+                "latency_seconds": round(time.time() - start, 2),
                 "prompt": user_prompt,
+                "llm_mode": "none",
             }
         except httpx.HTTPStatusError as e:
             return {
-                "answer": f"ERROR: Ollama returned status {e.response.status_code}. "
-                          f"Is model '{self.config.model}' pulled?",
+                "answer": (
+                    f"❌ Ollama returned status {e.response.status_code}. "
+                    f"Is model '{self.config.model}' pulled? Run: `ollama pull llama3.1`"
+                ),
                 "model": self.config.model,
                 "citations": retrieved_chunks,
-                "latency_seconds": time.time() - start_time,
+                "latency_seconds": round(time.time() - start, 2),
                 "prompt": user_prompt,
+                "llm_mode": "ollama_error",
             }
-
-        latency = time.time() - start_time
-        result = response.json()
-        answer = result.get("message", {}).get("content", "No response from model.")
-
-        return {
-            "answer": answer,
-            "model": self.config.model,
-            "citations": retrieved_chunks,
-            "latency_seconds": round(latency, 2),
-            "prompt": user_prompt,
-        }

@@ -31,3 +31,6 @@ aiosqlite>=0.21.0
 # Streamlit frontend
 streamlit>=1.30.0
 requests>=2.31.0
+
+# Cloud LLM — Gemini 1.5 Flash (free tier, used on Streamlit Cloud)
+# httpx already included above — Gemini uses it directly (no extra SDK needed)
