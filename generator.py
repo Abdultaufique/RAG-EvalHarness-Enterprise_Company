@@ -88,12 +88,15 @@ def _generate_ollama(config: LLMConfig, user_prompt: str) -> tuple[str, str]:
 # ── Gemini backend ───────────────────────────────────────────────────────────
 
 def _generate_gemini(user_prompt: str, api_key: str) -> tuple[str, str]:
-    """Call Google Gemini 1.5 Flash API. Returns (answer_text, model_name)."""
-    model_name = "gemini-1.5-flash"
-    url = (
-        f"https://generativelanguage.googleapis.com/v1beta/models/"
-        f"{model_name}:generateContent?key={api_key}"
-    )
+    """Call Google Gemini API. Returns (answer_text, model_name)."""
+    # Try models in order until one works
+    models_to_try = [
+        "gemini-2.0-flash",
+        "gemini-2.0-flash-lite",
+        "gemini-1.5-flash-latest",
+        "gemini-1.5-flash-002",
+    ]
+
     full_prompt = f"{SYSTEM_PROMPT}\n\n{user_prompt}"
     payload = {
         "contents": [{"parts": [{"text": full_prompt}]}],
@@ -102,16 +105,36 @@ def _generate_gemini(user_prompt: str, api_key: str) -> tuple[str, str]:
             "maxOutputTokens": 1024,
         },
     }
-    with httpx.Client(timeout=60.0) as client:
-        response = client.post(url, json=payload)
-        response.raise_for_status()
 
-    data = response.json()
-    try:
-        answer = data["candidates"][0]["content"]["parts"][0]["text"]
-    except (KeyError, IndexError):
-        answer = "No response from Gemini model."
-    return answer, f"gemini/{model_name}"
+    last_error = None
+    for model_name in models_to_try:
+        url = (
+            f"https://generativelanguage.googleapis.com/v1beta/models/"
+            f"{model_name}:generateContent?key={api_key}"
+        )
+        try:
+            with httpx.Client(timeout=60.0) as client:
+                response = client.post(url, json=payload)
+                if response.status_code == 404:
+                    last_error = f"Model {model_name} not found, trying next..."
+                    continue
+                response.raise_for_status()
+
+            data = response.json()
+            try:
+                answer = data["candidates"][0]["content"]["parts"][0]["text"]
+            except (KeyError, IndexError):
+                answer = "No response from Gemini model."
+            return answer, f"gemini/{model_name}"
+
+        except httpx.HTTPStatusError as e:
+            last_error = f"{model_name}: HTTP {e.response.status_code}"
+            continue
+        except Exception as e:
+            last_error = str(e)
+            continue
+
+    raise RuntimeError(f"All Gemini models failed. Last error: {last_error}")
 
 
 # ── Generator class ──────────────────────────────────────────────────────────
