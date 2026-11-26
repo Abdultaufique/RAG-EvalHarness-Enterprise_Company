@@ -29,3 +29,21 @@ Thumbs.db
 *.egg-info/
 dist/
 build/
+
+# Streamlit secrets (never commit this!)
+.streamlit/secrets.toml
+
+# Word documents (project reports/logbook - not needed in repo)
+*.docx
+
+# Temp / scratch scripts
+fix_all_blank_pages.py
+generate_clean_log_book.py
+build_perfect_log_book.py
+update_log_book.py
+verify_clean.py
+test_sec1_cleaned.docx
+
+# Generated images (optional - keep if you want them)
+# chart_*.png
+# diagram_*.png

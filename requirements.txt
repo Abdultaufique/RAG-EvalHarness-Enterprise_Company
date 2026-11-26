@@ -1,8 +1,12 @@
+# Requirements for Streamlit Cloud deployment
+# NOTE: Ollama runs locally - Streamlit Cloud version uses it via local backend
+# For pure cloud deploy, swap generator.py to use a cloud LLM API
+
 # Document extraction
 PyMuPDF>=1.25.0
 python-docx>=1.1.0
 
-# Embeddings & reranking
+# Embeddings
 sentence-transformers>=4.0.0
 torch>=2.7.0
 
@@ -18,8 +22,12 @@ httpx>=0.28.0
 # Utilities
 numpy>=2.0.0
 
-# API server (Milestone 4)
+# API server
 fastapi>=0.115.0
 uvicorn[standard]>=0.34.0
 python-multipart>=0.0.20
 aiosqlite>=0.21.0
+
+# Streamlit frontend
+streamlit>=1.30.0
+requests>=2.31.0
